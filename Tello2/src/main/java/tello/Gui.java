@@ -1,10 +1,9 @@
 package tello;
 
 /*
- * FIXES:
- * 1.) Put Camera in Frame
- * 2.) Fix GUI to make it look better
- * 3.) Camera and Button inputs are laggy (can i fix???)
+ * FIXES THAT NEED TO HAPPEN:
+ * 1.) Remove Controls Window and Console info
+ * 2.) Camera and Button inputs are laggy (can i fix???)
  * 
  */
 
