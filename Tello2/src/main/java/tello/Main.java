@@ -36,7 +36,7 @@ public class Main
 	    
 	    // Create an instance of the drone program (class) we want to run.
 	    
-	    Demo1 demo = new Demo1();
+//	    Demo1 demo = new Demo1();
 
 //		Demo2 demo = new Demo2();
 
@@ -61,6 +61,8 @@ public class Main
 //	    FindFace demo = new FindFace();
 
 //	    FindFace2 demo = new FindFace2();
+	    
+	    FindCar demo = new FindCar();
 	    
 	    // Run that program.
 	    demo.execute();
