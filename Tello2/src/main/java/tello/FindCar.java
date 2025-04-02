@@ -150,10 +150,11 @@ public class FindCar
                         camera.addTarget(null);
                         
                         // draw all detected cars (can be edited for just one)
-                        for (Rect car : cars)
-                        {
-                            camera.addTarget(car, 2, new Scalar(0, 255, 0));
+                        for (Rect car : cars){
+                        if (car.width >= 200 && car.height >= 80){
+                            camera.addTarget(car, 2, new Scalar(255, 255, 0));
                         }
+                    }
                     }
                     else
                     {
