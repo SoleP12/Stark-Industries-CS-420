@@ -7,18 +7,72 @@
     <groupId>com.swdevs.tello</groupId>
     <artifactId>Tello-Demo</artifactId>
     <version>1.0-SNAPSHOT</version>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>8</source>
-          <target>8</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+
+    <dependencies>
+    <!-- DJL Core API -->
+    <dependency>
+        <groupId>ai.djl</groupId>
+        <artifactId>api</artifactId>
+        <version>0.26.0</version>
+    </dependency>
+
+    <!-- DJL ONNXRuntime Engine -->
+    <dependency>
+        <groupId>ai.djl.onnxruntime</groupId>
+        <artifactId>onnxruntime-engine</artifactId>
+        <version>0.26.0</version>
+    </dependency>
+
+        <!-- SLF4J Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.9</version>
+        </dependency>
+        
+        <dependency>
+    		<groupId>org.openpnp</groupId>
+    		<artifactId>opencv</artifactId>
+    		<version>4.5.1-2</version>
+		</dependency>
 
 
+    </dependencies>
+    
+<repositories>
+    <repository>
+        <id>djl-repo</id>
+        <url>https://repo1.maven.org/maven2/ai/djl/api/0.26.0/api-0.26.0.pom</url>
+    </repository>
+    
+        <repository>
+        <id>djl-repo-onnx</id>
+        <url>https://repo1.maven.org/maven2/ai/djl/onnxruntime/onnxruntime-engine/0.26.0/onnxruntime-engine-0.26.0.pom</url>
+    </repository>
+    
+    <repository>
+        <id>central</id>
+        <url>https://repo.maven.apache.org/maven2</url>
+    </repository>
+
+</repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
