@@ -8,7 +8,7 @@
     <artifactId>Tello-Demo</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-    <dependencies>
+   <dependencies>
     <!-- DJL Core API -->
     <dependency>
         <groupId>ai.djl</groupId>
@@ -23,26 +23,41 @@
         <version>0.26.0</version>
     </dependency>
 
-        <!-- SLF4J Logging -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>2.0.9</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.9</version>
-        </dependency>
+    <!-- SLF4J Logging -->
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>2.0.9</version>
+    </dependency>
         
-        <dependency>
-    		<groupId>org.openpnp</groupId>
-    		<artifactId>opencv</artifactId>
-    		<version>4.5.1-2</version>
-		</dependency>
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>2.0.9</version>
+    </dependency>
+        
+    <!-- OpenCV -->
+    <dependency>
+    	<groupId>org.openpnp</groupId>
+    	<artifactId>opencv</artifactId>
+    	<version>4.5.1-2</version>
+	</dependency>
+	
+	<!-- Jamepad (had to switch the version to 1.4.0) -->
+	<dependency>
+      <groupId>com.github.WilliamAHartman</groupId>
+      <artifactId>Jamepad</artifactId>
+      <version>1.4.0</version>
+    </dependency>
+    
+    <!-- ArUco for OpenCV-->
+	<dependency>
+	  <groupId>org.bytedeco</groupId>
+	  <artifactId>opencv-platform</artifactId>
+	  <version>4.5.3-1.5.6</version>
+	</dependency>
 
-
-    </dependencies>
+   </dependencies>
     
 <repositories>
     <repository>
@@ -58,6 +73,16 @@
     <repository>
         <id>central</id>
         <url>https://repo.maven.apache.org/maven2</url>
+    </repository>
+    
+    <repository>
+        <id>Jamepad</id>
+        <url>https://github.com/williamahartman/Jamepad/tree/master/src/com/studiohartman/</url>
+    </repository>
+    
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
     </repository>
 
 </repositories>
