@@ -1,129 +1,97 @@
 package tellolib.camera;
 
-import java.util.logging.Logger;
-
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Rect;
-import org.opencv.core.Size;
+import org.opencv.core.*;
+import org.opencv.dnn.*;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.objdetect.CascadeClassifier;
-import org.opencv.objdetect.Objdetect;
+import java.util.ArrayList;
+import java.util.List;
 
-/*
- *car detection with OpenCV. Got confused with yolov5 into java so did something simple instead
+/* 
+ * Purpose: The main implementation for the CarDetection.
+ * Uses Singleton Method/instance for easier usage in the demo
+ * Refactored the code to implement YOLOv5M in object detection for accuracy
  */
-public class CarDetection implements CarDetectionInterface
-{
-    private final Logger logger = Logger.getLogger("Tello");
-    
-    // classifier for car detection
-    private CascadeClassifier carCascade = new CascadeClassifier();
+public class CarDetection implements CarDetectionInterface {
+    private static CarDetection instance;
+    private final Net net;
+    private final float confThreshold = 0.5f;
+    private final float nmsThreshold = 0.4f;
+    private List<Rect> lastDetections = new ArrayList<>();
+    private Mat lastFrame = null;
 
-    // stored tfound cars in array
-    private Rect[] carsArray = null;
-    
-    
-    private CarDetection()
-    {
-        // path changes depending on device so change accordingly
-    	//usually is the root directory
-        // e.g. C:\whatever\to\ourproject 
-    	// shouldn't need to be changed
-        String basePath = System.getProperty("user.dir");
-        
-        // location of the cars.xml file i got from someone's git, but we might need to make our own?
-        // edit code to correct directory
-        String classifierPath = basePath + "\\src\\resources\\cars.xml";
-        
-        logger.finer("Car classifier path=" + classifierPath);
-        
-        boolean loaded = carCascade.load(classifierPath);
-        if (!loaded) {
-            logger.severe("Failed to load car cascade from " + classifierPath);
-        }
-        else {
-            logger.info("Car cascade loaded from " + classifierPath);
-        }
+    private CarDetection() {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        this.net = Dnn.readNetFromONNX("resources/yolov5m.onnx");
     }
-    
-    private static class SingletonHolder 
-    {
-        public static final CarDetection INSTANCE = new CarDetection();
-    }
-    
-    /*
-     *get the global instance of CarDetection
-     *global CarDetection instance
+    /* 
+     * Singleton Method implementation
      */
-    public static CarDetection getInstance()
-    {
-        return SingletonHolder.INSTANCE;
-    }
-
-    /*
-     *detect cars on the current image from the Tello camera
-     */
-    @Override
-    public boolean detectCars()
-    {
-        Mat image = TelloCamera.getInstance().getImage();
-        return detectCars(image);
-    }
-
-    /*
-     *detect cars on a given Mat image
-     */
-    @Override
-    public boolean detectCars(Mat image)
-    {
-        if (image == null || image.empty()) {
-            return false;
+    public static CarDetection getInstance() {
+        if (instance == null) {
+            instance = new CarDetection();
         }
-        
-        MatOfRect cars = new MatOfRect();
-        Mat grayFrame = new Mat();
-        
-        logger.finer("detectCars");
-        
-        //converts to grayscale
-        Imgproc.cvtColor(image, grayFrame, Imgproc.COLOR_BGR2GRAY);
-        //equalize histogram to improve detection in varying lightings might be an issue with our frames
-        Imgproc.equalizeHist(grayFrame, grayFrame);
-        
-        //compute a minimum car size although this might be arbitrary ngl
-        //basically like if 2% of the image height to take out tiny false positives
-        int height = grayFrame.rows();
-        int absoluteCarSize = (int) Math.round(height * 0.02f);
-        
-        // detect cars
-        carCascade.detectMultiScale(
-            grayFrame,
-            cars,
-            1.1,         // scaleFactor
-            2,           // minNeighbors
-            0 | Objdetect.CASCADE_SCALE_IMAGE,
-            new Size(absoluteCarSize, absoluteCarSize),
-            new Size()   // no max size may need to add maybe one
-        );
-        
-        carsArray = cars.toArray();
-        
-        logger.finer("cars detected = " + carsArray.length);
-        
-        return carsArray.length > 0;
+        return instance;
     }
 
     @Override
-    public int getCarCount()
-    {
-        if (carsArray == null) return 0;
-        return carsArray.length;
+    public boolean detectCars(Mat frame) {
+        this.lastFrame = frame;
+        lastDetections.clear();
+
+        Size inputSize = new Size(640, 640);
+        Mat blob = Dnn.blobFromImage(frame, 1.0 / 255.0, inputSize, new Scalar(0, 0, 0), true, false);
+        net.setInput(blob);
+
+        List<Mat> outputs = new ArrayList<>();
+        List<String> outNames = new ArrayList<>();
+        outNames.add("output");
+        net.forward(outputs, outNames);
+
+        Mat detections = outputs.get(0).reshape(1, (int)outputs.get(0).total() / 85);
+
+        for (int i = 0; i < detections.rows(); i++) {
+            double confidence = detections.get(i, 4)[0];
+            if (confidence > confThreshold) {
+                int classId = -1;
+                double maxClassScore = 0;
+
+                for (int j = 5; j < 85; j++) {
+                    double score = detections.get(i, j)[0];
+                    if (score > maxClassScore) {
+                        maxClassScore = score;
+                        classId = j - 5;
+                    }
+                }
+
+                if (classId == 2 && maxClassScore > confThreshold) { // class 2 = car
+                    double cx = detections.get(i, 0)[0] * frame.cols();
+                    double cy = detections.get(i, 1)[0] * frame.rows();
+                    double w = detections.get(i, 2)[0] * frame.cols();
+                    double h = detections.get(i, 3)[0] * frame.rows();
+
+                    int left = (int)(cx - w / 2);
+                    int top = (int)(cy - h / 2);
+                    lastDetections.add(new Rect(left, top, (int)w, (int)h));
+                }
+            }
+        }
+
+        return !lastDetections.isEmpty();
     }
 
     @Override
-    public Rect[] getCars()
-    {
-        return carsArray;
+    public boolean detectCars() {
+        if (lastFrame == null) return false;
+        return detectCars(lastFrame);
+    }
+
+    @Override
+    public int getCarCount() {
+        return lastDetections.size();
+    }
+
+    @Override
+    public Rect[] getCars() {
+        return lastDetections.toArray(new Rect[0]);
     }
 }
