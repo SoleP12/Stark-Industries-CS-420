@@ -18,6 +18,7 @@ import tellolib.control.TelloControl;
 import tellolib.drone.TelloDrone;
 
 public class FindCar {
+    //Declare variables for drone
     private final Logger logger = Logger.getGlobal();
 
     private TelloControl telloControl;
@@ -38,12 +39,14 @@ public class FindCar {
         controllers = new ControllerManager();
         controllers.initSDLGamepad();
 
+        //Check for controller, if controller is NOT connected, switch to keyboard controls
         ControllerState currState = controllers.getState(0);
         if (!currState.isConnected) {
             logger.info("controller not connected, enabling keyboard controls");
             useKeyboard = true;
         }
 
+        //Initialize instances of drone and the car detection components
         telloControl = TelloControl.getInstance();
         drone = TelloDrone.getInstance();
         camera = TelloCamera.getInstance();
@@ -51,9 +54,11 @@ public class FindCar {
 
         telloControl.setLogLevel(Level.FINE);
 
+        //Initialize keyboard listner
         Thread keyboardThread = new Thread(() -> listenForKeyboard());
         if (useKeyboard) keyboardThread.start();
 
+        //try to connect the tello drone and turn camera on 
         try {
             telloControl.connect();
             telloControl.enterCommandMode();
@@ -68,16 +73,23 @@ public class FindCar {
 
                 if (currState.backJustPressed) {
                     logger.info("back button");
-                    if (drone.isFlying()) telloControl.land();
+                    if (drone.isFlying()) telloControl.land(); //kill drone 
                     break;
                 }
 
+                // start button = takeoff / land
                 if (currState.startJustPressed) {
                     logger.info("start button");
                     if (drone.isFlying()) telloControl.land();
                     else telloControl.takeOff();
                 }
 
+                /*
+                Controls:
+                A = Take picture
+                B = Record video
+                X = car detection on 
+                */
                 if (currState.aJustPressed) {
                     camera.takePicture(System.getProperty("user.dir") + "\\Photos");
                 }
