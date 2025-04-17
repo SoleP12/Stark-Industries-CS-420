@@ -1,9 +1,11 @@
+import logging
+
 import cv2
 from ultralytics import YOLO
-
+# 🔇 Silence YOLO's spammy logs
+logging.getLogger("ultralytics").setLevel(logging.WARNING)
 # Load YOLOv8 model (use YOLOv8n or YOLOv8s for speed; replace with your own if needed)
 model = YOLO('yolov8n.pt')  # You can change this to 'yolov8s.pt' or a custom path
-
 # Define class names for COCO dataset
 # Class ID 2 is 'car'
 CAR_CLASS_ID = 2
