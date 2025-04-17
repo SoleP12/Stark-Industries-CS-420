@@ -25,3 +25,9 @@ COPY . .
 
 # 7. Launch your orchestrator
 CMD ["python", "run_all.py"]
+
+#To Build and Run this file. make sure you have docker downloaded.
+#Build line:
+# docker build -t tello-car-detector:latest .
+#Run line:
+# docker run --rm -it -v "${PWD}\traffic_data.db:/app/traffic_data.db" -v "${PWD}\yolov8n.pt:/app/yolov8n.pt" tello-car-detector:latest
