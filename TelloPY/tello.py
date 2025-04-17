@@ -329,11 +329,3 @@ class Tello(object):
         :return: Response from Tello, 'OK' or 'FALSE'.
         """
         return self.move('up', distance)
-    
-    def streamon(self):
-        """Start video streaming."""
-        return self.send_command('streamon')
-
-    def streamoff(self):
-        """Stop video streaming."""
-        return self.send_command('streamoff')

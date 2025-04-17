@@ -1,0 +1,9 @@
+just type
+pip install -r requirements.txt
+to install everything you need (make sure you have pytorth already)
+
+pip install -r requirements.txt
+python setup_db.py
+python FindCar.py
+
+ignore except pytorth stuff

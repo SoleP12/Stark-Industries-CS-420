@@ -1,1 +1,0 @@
-Use this folder to store saved videos and photos taken with the Tello.

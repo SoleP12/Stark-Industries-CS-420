@@ -6,16 +6,11 @@ import os
 import time
 import platform
 
-import cv2
-from ultralytics import YOLO
-import PIL.Image, PIL.ImageTk
-
 class TelloUI(object):
     """
     Wrapper class to enable the GUI.
     """
-    #make tello None for testing
-    def __init__(self, tello =None):
+    def __init__(self, tello):
         """
         Initializes all the element of the GUI, supported by Tkinter
 
@@ -53,53 +48,6 @@ class TelloUI(object):
 
         # the sending_command will send command to tello every 5 seconds
         self.sending_command_thread = threading.Thread(target = self._sendingCommand)
-
-        # ─────── START VIDEO & DETECTION ───────
-        # 1. tello → streamon
-        self.tello.streamon()
-        # 2. openCV capture from drone UDP port
-        self.cap = cv2.VideoCapture('udp://@0.0.0.0:11111')
-        # 3. load YOLO model
-        self.model = YOLO("yolov5s.pt")
-        # 4. start video loop thread
-        threading.Thread(target=self._video_loop, daemon=True).start()
-    
-    def _video_loop(self):
-        while not self.stopEvent.is_set():
-            ret, frame = self.cap.read()
-            if not ret:
-                continue
-
-            # YOLO expects RGB
-            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            results = self.model(rgb)[0]
-
-            # draw detections
-            for box, cls, conf in zip(results.boxes.xyxy,
-                                      results.boxes.cls,
-                                      results.boxes.conf):
-                if int(cls) == 2:  # car
-                    x1, y1, x2, y2 = map(int, box)
-                    cv2.rectangle(frame, (x1,y1), (x2,y2), (0,255,0), 2)
-                    cv2.putText(frame, f"Car {conf:.2f}",
-                                (x1, y1-10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6,
-                                (0,255,0), 2)
-
-            # convert for Tkinter
-            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image = PIL.Image.fromarray(image)
-            imgtk = PIL.ImageTk.PhotoImage(image=image)
-
-            if self.panel is None:
-                self.panel = tki.Label(self.root, image=imgtk)
-                self.panel.image = imgtk
-                self.panel.pack(side="top", padx=10, pady=10)
-            else:
-                self.panel.configure(image=imgtk)
-                self.panel.image = imgtk
-
-            time.sleep(0.03)
             
     def _sendingCommand(self):
         """

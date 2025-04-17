@@ -3,7 +3,7 @@ from ui import TelloUI
 
 
 def main():
-    drone = tello.Tello('', 8889)   
+    drone = tello.Tello('', 8889)  
     vplayer = TelloUI(drone)
     vplayer.root.mainloop() 
 
